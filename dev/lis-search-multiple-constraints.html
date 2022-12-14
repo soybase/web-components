@@ -29,26 +29,25 @@
     // an example gene search query for the LIS GraphQL API
     const geneQuery = `
       query ExampleGeneQuery($strain: String, $family: String, $description: String, $start: Int, $size: Int) {
-        genes(strain: $strain, family: $family, $keyword, start: $start, size: $size) {
-          strain
-          family
+        genes(strain: $strain, family: $family, description: $description, start: $start, size: $size) {
+	  name
+	  strain {name}
           description
-          start
-          size
         }
       }
       `;
-    const testVariables = {'strain': 'WM82', 'family': '', 'query': 'NB-ARC'};
 
-    function getGenes(searchData, page, {abortSignal}) {
+    const testVariables = {'strain': '', 'family': '', 'description': 'NB-ARC', 'start': 1, 'size': 10};
+    function getGenes(searchData, page) {
       const keyword = searchData['query'];
       const pageSize = 10;
       const start = (page-1)*pageSize;
+      const uri = 'http://dev.lis.ncgr.org:50054/server';
       // pageSize+1 because we want to see if there's a "next" page
 //      const variables = {keyword, start, size: pageSize+1};
       // returns a Promise that resolves to an array of Gene objects the gene search
       // Web Component knows how to parse: {name: string, description: string}[]
-      return graphqlQuery(uri, geneQuery, variables, abortSignal)
+      return graphqlQuery(uri, geneQuery, searchData, undefined)
         .then(({data}) => {
           // compute if there's a next page
 //          const hasNext = pageSize+1 === data.geneSearch.length;
@@ -66,7 +65,7 @@
     }
 // A function that gets data from a GraphQL server via a POST request.
 // Adapted from https://graphql.org/graphql-js/graphql-clients/
-    getGenes(testVariables, 1, abortSignal=undefined);
+    getGenes(testVariables, 1);
   </script>
 
 </body>
